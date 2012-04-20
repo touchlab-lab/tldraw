@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -119,7 +121,7 @@ public class Draw extends Activity {
             public void onClick(View view) {
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(view.getContext());
-                alert.setTitle("Are you sure you want to clear your drawing?");
+                alert.setTitle("Are you sure you want to \n clear your drawing?");
 
 
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -152,6 +154,7 @@ public class Draw extends Activity {
                     timeLeft = findDiff();
 
                     final long finalTimeLeft = timeLeft;
+
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -167,6 +170,23 @@ public class Draw extends Activity {
                 }while(timeLeft > 0);
 
                 stopDrawing();
+                saveViewScreenshot(drawView);
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(drawView.getContext());
+                        alert.setTitle("Your drawing has been saved!");
+
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                drawView.clearAll();
+                            }
+                        });
+
+                        alert.show();
+                    }
+                });
             }
         }.start();
 
@@ -191,54 +211,37 @@ public class Draw extends Activity {
         return 30 - diff;
     }
 
-    /**public static void saveViewScreenshot(Context c, String name, boolean png, boolean addTimestamp, View view)
+    public static void saveViewScreenshot( View view)
     {
         Bitmap b;
         if(view.isDrawingCacheEnabled())
         {
             b = view.getDrawingCache();
-            saveBitmap(c, b, name, png, addTimestamp);
+            saveBitmap(b);
         }
         else
         {
             view.buildDrawingCache();
             b = view.getDrawingCache();
-            saveBitmap(c, b, name, png, addTimestamp);
+            saveBitmap(b);
             view.destroyDrawingCache();
         }
     }
 
-    public synchronized static void saveFile(Context c, InputStream inp, String name, String type, boolean addTimestamp)
+    public static void saveBitmap( Bitmap bitmap)
     {
         try
         {
-
-
-            long now = System.currentTimeMillis();
-
-            StringBuilder sb = new StringBuilder();
-            sb.append(name);
-            sb.append(".").append(addTimestamp ? now : 0l);
-            sb.append(".").append(type);
-
-            File saveFileObj = new File("./", sb.toString());
-            try
-            {
-                copy(inp, saveFileObj, fileTypeMaxSize);
-            }
-            catch (Exception e)
-            {
-
-                saveFileObj.delete();
-            }
+            File imageFile = new File( Environment.getExternalStorageDirectory().getPath(), "masterpiece_"+ System.currentTimeMillis() +".png");
+            FileOutputStream imgOut = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, imgOut);
+            
+            imgOut.close();
 
         }
         catch (Exception e)
         {
-            InternalLog.logExecption(e);
+            Log.e(Draw.class.getSimpleName(), null, e);
         }
     }
-     **/
-
-
 }
