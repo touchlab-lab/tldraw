@@ -14,8 +14,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ba0b3dd9-4f7a-463e-afe7-dc5ffe79fe93" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/layout/intro.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/co/touchlab/pdraw/Intro.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AndroidManifest.xml" afterPath="$PROJECT_DIR$/AndroidManifest.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/co/touchlab/pdraw/R.java" afterPath="$PROJECT_DIR$/gen/co/touchlab/pdraw/R.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/values/strings.xml" afterPath="$PROJECT_DIR$/res/values/strings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/co/touchlab/pdraw/Draw.java" afterPath="$PROJECT_DIR$/src/co/touchlab/pdraw/Draw.java" />
     </list>
     <ignored path="pdraw-android.iws" />
@@ -114,16 +118,16 @@
       <file leaf-file-name="main.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/res/layout/main.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="65" column="38" selection-start="2304" selection-end="2304" vertical-scroll-proportion="0.0">
+            <state line="6" column="37" selection-start="285" selection-end="285" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Draw.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Draw.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/co/touchlab/pdraw/Draw.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="179" column="31" selection-start="6020" selection-end="6020" vertical-scroll-proportion="0.44327176">
+            <state line="27" column="27" selection-start="775" selection-end="775" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -131,10 +135,28 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="Intro.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/co/touchlab/pdraw/Intro.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="48" column="36" selection-start="1674" selection-end="1674" vertical-scroll-proportion="0.5408163">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="intro.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/res/layout/intro.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="37" selection-start="517" selection-end="517" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="AndroidManifest.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="37" selection-start="473" selection-end="473" vertical-scroll-proportion="0.0">
+            <state line="10" column="54" selection-start="568" selection-end="568" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -183,7 +205,7 @@
       <file leaf-file-name="strings.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="35" selection-start="169" selection-end="169" vertical-scroll-proportion="0.0">
+            <state line="4" column="0" selection-start="156" selection-end="156" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -210,11 +232,13 @@
         <option value="$PROJECT_DIR$/res/layout-land/ambilwarna_dialog.xml" />
         <option value="$PROJECT_DIR$/src/yuku/ambilwarna/AmbilWarnaDialog.java" />
         <option value="$PROJECT_DIR$/res/layout/spinner.xml" />
-        <option value="$PROJECT_DIR$/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/res/layout/main.xml" />
         <option value="$PROJECT_DIR$/src/co/touchlab/pdraw/views/DrawView.java" />
-        <option value="$PROJECT_DIR$/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/src/co/touchlab/pdraw/Draw.java" />
+        <option value="$PROJECT_DIR$/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/res/layout/intro.xml" />
+        <option value="$PROJECT_DIR$/src/co/touchlab/pdraw/Intro.java" />
       </list>
     </option>
   </component>
@@ -627,7 +651,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32764506" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32671756" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -653,8 +677,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="OFFER_MOVE_TO_ANOTHER_CHANGELIST_ON_PARTIAL_COMMIT" value="true" />
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
-    <option name="CHECK_NEW_TODO" value="true" />
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <option name="myTodoPanelSettings">
       <value>
         <are-packages-shown value="false" />
@@ -719,6 +743,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/co/touchlab/pdraw/views/DrawView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="125" column="0" selection-start="2987" selection-end="2987" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#647#654#0" expanded="true" />
+            <element signature="e#715#728#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/yuku/ambilwarna/AmbilWarnaDialog.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="35" column="57" selection-start="992" selection-end="992" vertical-scroll-proportion="0.0" />
@@ -733,42 +768,45 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="35" selection-start="169" selection-end="169" vertical-scroll-proportion="0.0">
+        <state line="4" column="0" selection-start="156" selection-end="156" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/res/layout/main.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="65" column="38" selection-start="2304" selection-end="2304" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/co/touchlab/pdraw/views/DrawView.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="125" column="0" selection-start="2987" selection-end="2987" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#647#654#0" expanded="true" />
-            <element signature="e#715#728#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="37" selection-start="473" selection-end="473" vertical-scroll-proportion="0.0">
+        <state line="6" column="37" selection-start="285" selection-end="285" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/co/touchlab/pdraw/Draw.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="179" column="31" selection-start="6020" selection-end="6020" vertical-scroll-proportion="0.44327176">
+        <state line="27" column="27" selection-start="775" selection-end="775" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="54" selection-start="568" selection-end="568" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/layout/intro.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="37" selection-start="517" selection-end="517" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/co/touchlab/pdraw/Intro.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="36" selection-start="1674" selection-end="1674" vertical-scroll-proportion="0.5408163">
+          <folding />
         </state>
       </provider>
     </entry>

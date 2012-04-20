@@ -37,15 +37,20 @@ public final class R {
         public static final int ambilwarna_viewSatBri=0x7f070002;
         public static final int ambilwarna_warnaBaru=0x7f070008;
         public static final int ambilwarna_warnaLama=0x7f070007;
-        public static final int clearButton=0x7f07000c;
-        public static final int color=0x7f070009;
-        public static final int drawView=0x7f07000d;
-        public static final int lineWidthButton=0x7f07000a;
-        public static final int timeLeft=0x7f07000b;
+        public static final int clearButton=0x7f070010;
+        public static final int code=0x7f07000b;
+        public static final int color=0x7f07000d;
+        public static final int drawView=0x7f070011;
+        public static final int go=0x7f07000c;
+        public static final int intro=0x7f07000a;
+        public static final int lineWidthButton=0x7f07000e;
+        public static final int timeLeft=0x7f07000f;
+        public static final int welcome=0x7f070009;
     }
     public static final class layout {
         public static final int ambilwarna_dialog=0x7f030000;
-        public static final int main=0x7f030001;
+        public static final int intro=0x7f030001;
+        public static final int main=0x7f030002;
     }
     public static final class string {
         public static final int app_name=0x7f050000;

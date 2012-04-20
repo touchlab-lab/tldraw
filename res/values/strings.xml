@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">pdraw-android</string>
     <string name="choose_width">Choose Width</string>
+
 </resources>

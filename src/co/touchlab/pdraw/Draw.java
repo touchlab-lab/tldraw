@@ -24,7 +24,7 @@ import java.io.*;
 
 public class Draw extends Activity {
     private int myColor = Color.argb(0xff, 0xff, 0xff, 0xff);
-    ;
+
     private View colorBox;
     private DrawView drawView;
     private Button lineWidth;
