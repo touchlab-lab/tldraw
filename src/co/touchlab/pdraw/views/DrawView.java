@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,12 +22,14 @@ import java.util.List;
 public class DrawView extends View
 {
     private boolean drawing = false;
+    private boolean drawable = true;
 
     private List<Float> points = new ArrayList<Float>(100);
     private List<ColorPoints> lineList = new ArrayList<ColorPoints>();
 
     private long lastDraw = 0l;
-    private int myColor = Color.argb(0xff, 0xff, 0xff, 0xff);
+    private int myColor;
+    private Float chosenWidth = 0f;
 
     public DrawView(Context context)
     {
@@ -49,11 +50,13 @@ public class DrawView extends View
     {
         int color;
         List<Float> points;
+        Float width;
 
-        ColorPoints(int color, List<Float> points)
+        ColorPoints(int color, List<Float> points, Float width)
         {
             this.color = color;
             this.points = points;
+            this.width = width;
         }
 
         public int getColor()
@@ -64,6 +67,11 @@ public class DrawView extends View
         public List<Float> getPoints()
         {
             return points;
+        }
+        
+        public Float getWidth()
+        {
+            return width;
         }
     }
 
@@ -76,16 +84,20 @@ public class DrawView extends View
 
         Paint paint = new Paint();
         paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeWidth(11f);
+        
 
         for (ColorPoints linePoints : lineList)
         {
             paint.setColor(linePoints.getColor());
+            paint.setStrokeWidth(linePoints.getWidth());
             drawALine(canvas, paint, linePoints.getPoints());
         }
 
         paint.setColor(myColor);
+        paint.setStrokeWidth(chosenWidth);
+        Log.i(getClass().getSimpleName(), "chosenWidth :" + chosenWidth);
         drawALine(canvas, paint, points);
+        
     }
 
     private void drawALine(Canvas canvas, Paint paint, List<Float> thePoints)
@@ -109,6 +121,9 @@ public class DrawView extends View
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+        if(!drawable)
+            return false;
+
         int action = event.getAction();
 
         boolean actionDown = action == MotionEvent.ACTION_DOWN;
@@ -125,7 +140,7 @@ public class DrawView extends View
                 drawing = false;
                 shovePoints(event);
 
-                lineList.add(new ColorPoints(myColor, points));
+                lineList.add(new ColorPoints(myColor, points, chosenWidth));
 
                 points = new ArrayList<Float>(100);
 
@@ -179,5 +194,22 @@ public class DrawView extends View
     public void setColor(int myColor)
     {
         this.myColor = myColor;
+    }
+    
+    public void setChosenWidth(Float f)
+    {
+        this.chosenWidth = f;
+    }
+
+    public void clearAll()
+    {
+        lineList.clear();
+        points.clear();
+
+        invalidate();
+    }
+
+    public void setDrawable(boolean drawable) {
+        this.drawable = drawable;
     }
 }

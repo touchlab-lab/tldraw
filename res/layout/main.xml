@@ -25,7 +25,7 @@
 
             <ImageView
                     android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_height="50dp"
                     android:id="@+id/color"/>
 
         </FrameLayout>
@@ -49,6 +49,7 @@
                 android:text="Time Left"
                 android:layout_marginTop="10dp"
                 />
+       
 
         <TextView
                 android:layout_width="wrap_content"
@@ -57,6 +58,13 @@
                 android:textSize="42sp"
                 android:id="@+id/timeLeft"
                 />
+        
+        <Button
+                android:layout_margin="5dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearButton"
+                android:text="Clear"/>
 
 
     </LinearLayout>

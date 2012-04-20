@@ -37,8 +37,9 @@ public final class R {
         public static final int ambilwarna_viewSatBri=0x7f070002;
         public static final int ambilwarna_warnaBaru=0x7f070008;
         public static final int ambilwarna_warnaLama=0x7f070007;
+        public static final int clearButton=0x7f07000c;
         public static final int color=0x7f070009;
-        public static final int drawView=0x7f07000c;
+        public static final int drawView=0x7f07000d;
         public static final int lineWidthButton=0x7f07000a;
         public static final int timeLeft=0x7f07000b;
     }
@@ -48,5 +49,6 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f050000;
+        public static final int choose_width=0x7f050001;
     }
 }
