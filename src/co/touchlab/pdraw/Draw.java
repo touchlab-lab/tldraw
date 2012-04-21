@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,20 +15,19 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.*;
 import co.touchlab.pdraw.views.DrawView;
 import yuku.ambilwarna.AmbilWarnaDialog;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Draw extends Activity {
     private int myColor = Color.argb(0xff, 0xff, 0xff, 0xff);
 
     private View colorBox;
     private DrawView drawView;
-    private Button lineWidth;
     private int width = 7;
     private Button clear;
     private Long time;
@@ -76,42 +76,34 @@ public class Draw extends Activity {
             }
         });
 
-        lineWidth = (Button) findViewById(R.id.lineWidthButton);
-        lineWidth.setText(width + "");
-        lineWidth.setOnClickListener(new Button.OnClickListener() {
+        final Spinner lineWidth = (Spinner) findViewById(R.id.lineWidth);
+        List<String> lineWidths = new ArrayList<String>();
+        for(int i=1; i<50; i+=2)
+        {
+            lineWidths.add(Integer.toString(i));
+        }
+        ArrayAdapter aa = new ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                lineWidths);
+
+        lineWidth.setAdapter(aa);
+        lineWidth.setSelection(4); //Default to 7. Probably should be more careful here.
+
+        lineWidth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
+            {
+                String widthString = ((ArrayAdapter<String>) lineWidth.getAdapter()).getItem(position);
+                width = Integer.parseInt(widthString);
+                drawView.setChosenWidth((float) width);
+            }
 
             @Override
-            public void onClick(View view) {
-                //To change body of implemented methods use File | Settings | File Templates.
-                AlertDialog.Builder alert = new AlertDialog.Builder(view.getContext());
-                alert.setTitle("Choose a Line Width");
-                alert.setMessage("Enter a Number from 0-100 :");
+            public void onNothingSelected(AdapterView<?> adapterView)
+            {
 
-                // Set an EditText view to get user input
-                final EditText input = new EditText(view.getContext());
-                input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                input.setText(width + "");
-                input.selectAll();
-                alert.setView(input);
-
-                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        width = Integer.parseInt(input.getText().toString());
-                        drawView.setChosenWidth((float) width);
-                        lineWidth.setText(width + "");
-
-                        return;
-                    }
-                });
-
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        // TODO Auto-generated method stub
-                        return;
-                    }
-                });
-                alert.show();
             }
         });
 
@@ -243,5 +235,10 @@ public class Draw extends Activity {
         {
             Log.e(Draw.class.getSimpleName(), null, e);
         }
+    }
+
+    public static void callMe(Context c)
+    {
+        c.startActivity(new Intent(c, Draw.class));
     }
 }

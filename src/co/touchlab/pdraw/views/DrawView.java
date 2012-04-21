@@ -8,6 +8,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import co.touchlab.pdraw.service.PDrawUploadService;
+import co.touchlab.pdraw.service.UploadStroke;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +143,7 @@ public class DrawView extends View
                 shovePoints(event);
 
                 lineList.add(new ColorPoints(myColor, points, chosenWidth));
+                PDrawUploadService.startMe(getContext(), new UploadStroke(colorToHex(myColor), chosenWidth, points));
 
                 points = new ArrayList<Float>(100);
 
@@ -168,6 +171,11 @@ public class DrawView extends View
         }
 
         return true;
+    }
+
+    private String colorToHex(int color)
+    {
+        return Integer.toHexString(Color.red(color)) + Integer.toHexString(Color.green(color)) + Integer.toHexString(Color.blue(color));
     }
 
     private void shovePoints(MotionEvent event)

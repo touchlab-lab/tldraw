@@ -43,7 +43,7 @@ public final class R {
         public static final int drawView=0x7f070011;
         public static final int go=0x7f07000c;
         public static final int intro=0x7f07000a;
-        public static final int lineWidthButton=0x7f07000e;
+        public static final int lineWidth=0x7f07000e;
         public static final int timeLeft=0x7f07000f;
         public static final int welcome=0x7f070009;
     }
