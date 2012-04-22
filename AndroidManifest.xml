@@ -10,12 +10,15 @@
                   android:configChanges="keyboard|keyboardHidden|orientation"
                 android:screenOrientation="landscape"/>
 
-        <activity android:name=".Intro">
+        <activity android:name=".Intro"
+                  android:configChanges="keyboard|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ShowResult"
+                  android:configChanges="keyboard|keyboardHidden|orientation"/>
         <service android:name=".service.PDrawUploadService"/>
     </application>
 

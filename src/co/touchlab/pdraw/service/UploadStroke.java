@@ -27,12 +27,16 @@ public class UploadStroke extends JsonFileCommand
     private String color;
     private float width;
     private List<Float> points;
+    private int canvasWidth;
+    private int canvasHeight;
 
-    public UploadStroke(String color, float width, List<Float> points)
+    public UploadStroke(String color, float width, List<Float> points, int canvasWidth, int canvasHeight)
     {
         this.color = color;
         this.width = width;
         this.points = points;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
     }
 
     @Override
@@ -41,6 +45,8 @@ public class UploadStroke extends JsonFileCommand
         jsonObject.put("color", color);
         jsonObject.put("width", width);
         jsonObject.put("points", new JSONArray(points));
+        jsonObject.put("canvasWidth", canvasWidth);
+        jsonObject.put("canvasHeight", canvasHeight);
     }
 
     @Override
@@ -54,6 +60,9 @@ public class UploadStroke extends JsonFileCommand
         {
             points.add((float)jsonArray.getDouble(i));
         }
+
+        canvasWidth = (int) jsonObject.getInt("canvasWidth");
+        canvasHeight = (int) jsonObject.getInt("canvasHeight");
     }
 
     @Override
@@ -75,6 +84,8 @@ public class UploadStroke extends JsonFileCommand
                 .setColorhex(color)
                 .setWidth((int) width)
                 .addAllPoints(points)
+                .setCanvasWidth(canvasWidth)
+                .setCanvasHeight(canvasHeight)
                 .build();
         try
         {

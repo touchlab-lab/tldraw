@@ -4,12 +4,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import co.touchlab.pdraw.Draw;
 import co.touchlab.pdraw.service.PDrawUploadService;
 import co.touchlab.pdraw.service.UploadStroke;
+import co.touchlab.pdraw.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +33,10 @@ public class DrawView extends View
     private List<ColorPoints> lineList = new ArrayList<ColorPoints>();
 
     private long lastDraw = 0l;
-    private int myColor;
-    private Float chosenWidth = 0f;
+//    private int myColor;
+//    private Float chosenWidth = 0f;
+
+    private Draw drawActivity;
 
     public DrawView(Context context)
     {
@@ -48,13 +53,23 @@ public class DrawView extends View
         super(context, attrs, defStyle);
     }
 
+    public Draw getDrawActivity()
+    {
+        return drawActivity;
+    }
+
+    public void setDrawActivity(Draw drawActivity)
+    {
+        this.drawActivity = drawActivity;
+    }
+
     static class ColorPoints
     {
         int color;
         List<Float> points;
-        Float width;
+        int width;
 
-        ColorPoints(int color, List<Float> points, Float width)
+        ColorPoints(int color, List<Float> points, int width)
         {
             this.color = color;
             this.points = points;
@@ -71,7 +86,7 @@ public class DrawView extends View
             return points;
         }
         
-        public Float getWidth()
+        public int getWidth()
         {
             return width;
         }
@@ -84,6 +99,11 @@ public class DrawView extends View
 
         lastDraw = System.currentTimeMillis();
 
+        //Black out window
+        Paint fillPaint = new Paint();
+        fillPaint.setColor(Color.BLACK);
+        canvas.drawRect(new Rect(0, 0, getWidth(), getHeight()), fillPaint);
+
         Paint paint = new Paint();
         paint.setStrokeCap(Paint.Cap.ROUND);
         
@@ -91,13 +111,13 @@ public class DrawView extends View
         for (ColorPoints linePoints : lineList)
         {
             paint.setColor(linePoints.getColor());
-            paint.setStrokeWidth(linePoints.getWidth());
+            paint.setStrokeWidth(ViewUtils.dipToPixels(drawActivity, linePoints.getWidth()));
             drawALine(canvas, paint, linePoints.getPoints());
         }
 
-        paint.setColor(myColor);
-        paint.setStrokeWidth(chosenWidth);
-        Log.i(getClass().getSimpleName(), "chosenWidth :" + chosenWidth);
+        paint.setColor(drawActivity.getMyColor());
+        paint.setStrokeWidth(ViewUtils.dipToPixels(drawActivity, drawActivity.getWidth()));
+        Log.i(getClass().getSimpleName(), "chosenWidth :" + drawActivity.getWidth());
         drawALine(canvas, paint, points);
         
     }
@@ -142,8 +162,10 @@ public class DrawView extends View
                 drawing = false;
                 shovePoints(event);
 
-                lineList.add(new ColorPoints(myColor, points, chosenWidth));
-                PDrawUploadService.startMe(getContext(), new UploadStroke(colorToHex(myColor), chosenWidth, points));
+                lineList.add(new ColorPoints(drawActivity.getMyColor(), points, drawActivity.getWidth()));
+
+                if(!drawActivity.isPractice())
+                    PDrawUploadService.startMe(getContext(), new UploadStroke(colorToHex(drawActivity.getMyColor()), drawActivity.getWidth(), points, getWidth(), getHeight()));
 
                 points = new ArrayList<Float>(100);
 
@@ -175,7 +197,14 @@ public class DrawView extends View
 
     private String colorToHex(int color)
     {
-        return Integer.toHexString(Color.red(color)) + Integer.toHexString(Color.green(color)) + Integer.toHexString(Color.blue(color));
+        return colorPartToHex(Color.red(color)) + colorPartToHex(Color.green(color)) + colorPartToHex(Color.blue(color));
+    }
+
+    private String colorPartToHex(int part)
+    {
+        String hex = Integer.toHexString(part);
+
+        return hex.length() >=2 ? hex : ("0" + hex);
     }
 
     private void shovePoints(MotionEvent event)
@@ -197,16 +226,6 @@ public class DrawView extends View
         }
         points.add(x);
         points.add(y);
-    }
-
-    public void setColor(int myColor)
-    {
-        this.myColor = myColor;
-    }
-    
-    public void setChosenWidth(Float f)
-    {
-        this.chosenWidth = f;
     }
 
     public void clearAll()

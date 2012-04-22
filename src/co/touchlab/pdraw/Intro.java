@@ -15,6 +15,8 @@ import android.widget.TextView;
 import co.touchlab.appdebug.proto.Appdebug;
 import co.touchlab.ir.process.UploadManagerService;
 import co.touchlab.pdraw.views.DrawView;
+import co.touchlab.pdraw.views.IntentIntegrator;
+import co.touchlab.pdraw.views.IntentResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,22 +55,30 @@ public class Intro extends Activity
             @Override
             public void onClick(View view)
             {
-                try
-                {
-                    grabConch();
-                }
-                catch (IOException e)
-                {
-                    Log.e(getClass().getSimpleName(), null, e);
-                }
+                runQRScanner();
+            }
+        });
+
+        findViewById(R.id.practice).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                practiceDrawing();
             }
         });
     }
 
-    @SuppressWarnings("unchecked")
-    private void grabConch() throws IOException
+    private void runQRScanner()
     {
-        final EditText codeText = (EditText) findViewById(R.id.code);
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.initiateScan();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void grabConch(final String qrCodeValue) throws IOException
+    {
+        final EditText codeText = (EditText) findViewById(R.id.twitterHandle);
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Grabbing Conch...");
         progressDialog.show();
@@ -80,7 +90,7 @@ public class Intro extends Activity
                 Appdebug.IssueReportResponseTO checkReturnTO = null;
                 try
                 {
-                    InputStream result = UploadManagerService.callServerWithPayload("drawOnHomepage", null, codeText.getText().toString());
+                    InputStream result = UploadManagerService.callServerWithPayload("drawOnHomepage", null, qrCodeValue, codeText.getText().toString());
                     checkReturnTO = Appdebug.IssueReportResponseTO.parseFrom(result);
                 }
                 catch (IOException e)
@@ -97,7 +107,9 @@ public class Intro extends Activity
                 progressDialog.dismiss();
                 Appdebug.IssueReportResponseTO checkReturnTO = (Appdebug.IssueReportResponseTO) o;
                 if (checkReturnTO.getSuccess())
-                    startDrawing();
+                {
+                    startDrawing(qrCodeValue);
+                }
                 else
                 {
                     new AlertDialog.Builder(Intro.this)
@@ -115,7 +127,28 @@ public class Intro extends Activity
         }.execute();
     }
 
-    private void startDrawing()
+    public void onActivityResult(int requestCode, int resultCode, Intent intent)
+    {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanResult != null)
+        {
+            try
+            {
+                grabConch(scanResult.getContents());
+            }
+            catch (IOException e)
+            {
+                Log.e(getClass().getSimpleName(), null, e);
+            }
+        }
+    }
+
+    private void practiceDrawing()
+    {
+        Draw.callMe(this, null);
+    }
+
+    private void startDrawing(final String qrKey)
     {
         new AlertDialog.Builder(this)
                 .setMessage("OK! Get ready to draw! You have 30 seconds to create your masterpiece." +
@@ -124,7 +157,7 @@ public class Intro extends Activity
                 {
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        Draw.callMe(Intro.this);
+                        Draw.callMe(Intro.this, qrKey);
                     }
                 })
                 .show();
