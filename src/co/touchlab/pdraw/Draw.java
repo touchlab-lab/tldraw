@@ -32,6 +32,8 @@ import java.util.UUID;
 public class Draw extends Activity
 {
     public static final String QR_KEY = "QR_KEY";
+    public static final int DRAW_TIME = 60;
+    public static final int DEFAULT_WIDTH_INDEX = 4;
     private int myColor = Color.argb(0xff, 0xff, 0xff, 0xff);
 
     private View colorBox;
@@ -116,8 +118,13 @@ public class Draw extends Activity
 
         final Spinner lineWidth = (Spinner) findViewById(R.id.lineWidth);
         List<String> lineWidths = new ArrayList<String>();
+
+        int runCount = 0;
         for (int i = 1; i < 50; i += 2)
         {
+            if(runCount++ == DEFAULT_WIDTH_INDEX)
+                width = i;
+
             lineWidths.add(Integer.toString(i));
         }
         ArrayAdapter<String> aa = new ArrayAdapter<String>(
@@ -128,7 +135,7 @@ public class Draw extends Activity
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         lineWidth.setAdapter(aa);
-        lineWidth.setSelection(4); //Default to 7. Probably should be more careful here.
+        lineWidth.setSelection(DEFAULT_WIDTH_INDEX); //Default to 7. Probably should be more careful here.
 
         lineWidth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -208,7 +215,7 @@ public class Draw extends Activity
                 @Override
                 public void run()
                 {
-                    long timeLeft = 30;
+                    long timeLeft;
                     do
                     {
                         timeLeft = findDiff();
@@ -293,8 +300,13 @@ public class Draw extends Activity
 
     private long findDiff()
     {
-        long diff = (System.currentTimeMillis() - time) / 1000;
-        return 30 - diff;
+        long diff = findDiffMillis() / 1000;
+        return DRAW_TIME - diff;
+    }
+
+    public long findDiffMillis()
+    {
+        return (System.currentTimeMillis() - time);
     }
 
     public File saveViewScreenshot(View view)

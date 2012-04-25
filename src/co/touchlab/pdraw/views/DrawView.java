@@ -33,8 +33,6 @@ public class DrawView extends View
     private List<ColorPoints> lineList = new ArrayList<ColorPoints>();
 
     private long lastDraw = 0l;
-//    private int myColor;
-//    private Float chosenWidth = 0f;
 
     private Draw drawActivity;
 
@@ -68,12 +66,14 @@ public class DrawView extends View
         int color;
         List<Float> points;
         int width;
+        private int timeOffset;
 
-        ColorPoints(int color, List<Float> points, int width)
+        ColorPoints(int color, List<Float> points, int width, int timeOffset)
         {
             this.color = color;
             this.points = points;
             this.width = width;
+            this.timeOffset = timeOffset;
         }
 
         public int getColor()
@@ -89,6 +89,11 @@ public class DrawView extends View
         public int getWidth()
         {
             return width;
+        }
+
+        public int getTimeOffset()
+        {
+            return timeOffset;
         }
     }
 
@@ -138,6 +143,13 @@ public class DrawView extends View
                 startY = y;
             }
         }
+        else if(thePoints.size() == 2)
+        {
+            Float x = thePoints.get(0);
+            Float y = thePoints.get(1);
+
+            canvas.drawPoint(x, y, paint);
+        }
     }
 
     @Override
@@ -162,10 +174,11 @@ public class DrawView extends View
                 drawing = false;
                 shovePoints(event);
 
-                lineList.add(new ColorPoints(drawActivity.getMyColor(), points, drawActivity.getWidth()));
+                int diffMillis = (int) drawActivity.findDiffMillis();
+                lineList.add(new ColorPoints(drawActivity.getMyColor(), points, drawActivity.getWidth(), diffMillis));
 
                 if(!drawActivity.isPractice())
-                    PDrawUploadService.startMe(getContext(), new UploadStroke(colorToHex(drawActivity.getMyColor()), drawActivity.getWidth(), points, getWidth(), getHeight()));
+                    PDrawUploadService.startMe(getContext(), new UploadStroke(colorToHex(drawActivity.getMyColor()), drawActivity.getWidth(), points, getWidth(), getHeight(), diffMillis));
 
                 points = new ArrayList<Float>(100);
 
@@ -221,7 +234,7 @@ public class DrawView extends View
             double dist = Math.sqrt(Math.pow(lastX - x, 2) + Math.pow(lastY - y, 2));
 
             Log.i(getClass().getSimpleName(), "dist: "+ dist);
-            if(dist < 10)
+            if(dist < 4)
                 return;
         }
         points.add(x);

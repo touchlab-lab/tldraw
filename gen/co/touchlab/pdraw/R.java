@@ -27,8 +27,10 @@ public final class R {
         public static final int ambilwarna_target=0x7f020004;
         public static final int ic_launcher=0x7f020005;
         public static final int share=0x7f020006;
+        public static final int splash=0x7f020007;
     }
     public static final class id {
+        public static final int ButtonLogin=0x7f070017;
         public static final int ambilwarna_cursor=0x7f070004;
         public static final int ambilwarna_dialogView=0x7f070000;
         public static final int ambilwarna_state=0x7f070006;
@@ -38,26 +40,33 @@ public final class R {
         public static final int ambilwarna_viewSatBri=0x7f070002;
         public static final int ambilwarna_warnaBaru=0x7f070008;
         public static final int ambilwarna_warnaLama=0x7f070007;
-        public static final int clearButton=0x7f070013;
-        public static final int color=0x7f07000e;
-        public static final int doneButton=0x7f070012;
-        public static final int drawView=0x7f070014;
-        public static final int go=0x7f07000d;
+        public static final int clearButton=0x7f070016;
+        public static final int color=0x7f070011;
+        public static final int doneButton=0x7f070015;
+        public static final int drawView=0x7f070010;
+        public static final int go=0x7f07000f;
         public static final int intro=0x7f07000a;
-        public static final int lineWidth=0x7f07000f;
-        public static final int practice=0x7f07000c;
-        public static final int sharePic=0x7f070016;
-        public static final int showPic=0x7f070015;
-        public static final int timeLeft=0x7f070011;
-        public static final int timeLeftLabel=0x7f070010;
-        public static final int twitterHandle=0x7f07000b;
+        public static final int lineWidth=0x7f070012;
+        public static final int openAuth=0x7f07000d;
+        public static final int practice=0x7f07000e;
+        public static final int sharePic=0x7f070019;
+        public static final int showPic=0x7f070018;
+        public static final int splashImage=0x7f07001a;
+        public static final int timeLeft=0x7f070014;
+        public static final int timeLeftLabel=0x7f070013;
+        public static final int twitterHandle=0x7f07000c;
+        public static final int twitterIcon=0x7f07000b;
+        public static final int twitterlogin=0x7f07001b;
         public static final int welcome=0x7f070009;
     }
     public static final class layout {
         public static final int ambilwarna_dialog=0x7f030000;
         public static final int intro=0x7f030001;
         public static final int main=0x7f030002;
-        public static final int showresult=0x7f030003;
+        public static final int main_oauth=0x7f030003;
+        public static final int showresult=0x7f030004;
+        public static final int splash=0x7f030005;
+        public static final int twitter_login=0x7f030006;
     }
     public static final class string {
         public static final int app_name=0x7f050000;

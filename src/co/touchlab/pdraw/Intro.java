@@ -3,23 +3,36 @@ package co.touchlab.pdraw;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.*;
 import co.touchlab.appdebug.proto.Appdebug;
 import co.touchlab.ir.process.UploadManagerService;
+import co.touchlab.pdraw.utils.Const;
 import co.touchlab.pdraw.views.DrawView;
 import co.touchlab.pdraw.views.IntentIntegrator;
 import co.touchlab.pdraw.views.IntentResult;
+import org.apache.commons.lang3.StringUtils;
+import twitter4j.ProfileImage;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,24 +44,37 @@ import java.io.InputStream;
 public class Intro extends Activity
 {
 
+    public static final int OAUTH_REQUEST = 125;
+    public static final String SPLASH_URL = "SPLASH_URL";
+    private Twitter mTwitter;
+    private RequestToken mRequestToken;
+    private String twitterHandle;
+    private String twitterIcon;
+    private Button mLoginButton;
+    private Button goButton;
+    private String splashUrl;
+
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
         this.setContentView(R.layout.intro);
 
+        loadPassedUrl();
+
         TextView welcome = (TextView) findViewById(R.id.welcome);
-        welcome.setText("Welcome to Touch Lab");
+        welcome.setText("Touch Lab Remote Draw!");
 
         TextView intro = (TextView) findViewById(R.id.intro);
-        intro.setText("\nYou have 30 seconds to create" +
-                "        your own masterpiece to be featured on the company website! \n\n" +
+        intro.setText("\nCome decorate (or deface) our website.  You have 60 seconds to create" +
+                " your masterpiece! Watch it draw dynamically on the website! \n\n" +
                 "How to get started: \n\n" +
                 "1. Go to www.touchlab.co \t(on a different device). \n\n" +
-                "2. Enter the text code on the \tscreen in the box below. \n\n" +
-                "3. Don't draw anything \noffensive.");
+                "2. Authenticate with twitter (we don't read your tweets or do anything). \n\n" +
+                "3. Scan the QR code on screen. \n\n" +
+                "4. Draw! \n\n" +
+                "You can practice drawing first if you'd like.");
 
-        Button goButton;
         goButton = (Button) findViewById(R.id.go);
         goButton.setOnClickListener(new Button.OnClickListener()
         {
@@ -67,6 +93,42 @@ public class Intro extends Activity
                 practiceDrawing();
             }
         });
+
+        mLoginButton = (Button) findViewById(R.id.openAuth);
+        mLoginButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                ConfigurationBuilder confbuilder = new ConfigurationBuilder();
+                Configuration conf = confbuilder
+                        .setOAuthConsumerKey(Const.CONSUMER_KEY)
+                        .setOAuthConsumerSecret(Const.CONSUMER_SECRET)
+                        .build();
+                mTwitter = new TwitterFactory(conf).getInstance();
+                mTwitter.setOAuthAccessToken(null);
+                try
+                {
+                    mRequestToken = mTwitter.getOAuthRequestToken(Const.CALLBACK_URL);
+                    Intent intent = new Intent(Intro.this, TwitterLogin.class);
+                    intent.putExtra(Const.IEXTRA_AUTH_URL, mRequestToken.getAuthorizationURL());
+                    startActivityForResult(intent, OAUTH_REQUEST);
+                }
+                catch (TwitterException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        refreshTwitterHandle();
+    }
+
+    private void loadPassedUrl()
+    {
+        Intent intent = getIntent();
+        if(intent != null)
+            splashUrl = intent.getStringExtra(SPLASH_URL);
     }
 
     private void runQRScanner()
@@ -76,9 +138,10 @@ public class Intro extends Activity
     }
 
     @SuppressWarnings("unchecked")
-    private void grabConch(final String qrCodeValue) throws IOException
+    private void grabConch(final String qrUrl) throws IOException
     {
-        final EditText codeText = (EditText) findViewById(R.id.twitterHandle);
+        final String qrCodeValue = StringUtils.substring(qrUrl, qrUrl.lastIndexOf('/') + 1);
+
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Grabbing Conch...");
         progressDialog.show();
@@ -90,7 +153,7 @@ public class Intro extends Activity
                 Appdebug.IssueReportResponseTO checkReturnTO = null;
                 try
                 {
-                    InputStream result = UploadManagerService.callServerWithPayload("drawOnHomepage", null, qrCodeValue, codeText.getText().toString());
+                    InputStream result = UploadManagerService.callServerWithPayload("drawOnHomepage", null, qrCodeValue, twitterHandle);
                     checkReturnTO = Appdebug.IssueReportResponseTO.parseFrom(result);
                 }
                 catch (IOException e)
@@ -127,20 +190,175 @@ public class Intro extends Activity
         }.execute();
     }
 
+    @SuppressWarnings("unchecked")
+    private void refreshTwitterHandle()
+    {
+        new AsyncTask()
+        {
+            @Override
+            protected Object doInBackground(Object... objects)
+            {
+                try
+                {
+                    twitterHandle = findTwitterHandle();
+                    if(twitterHandle != null)
+                    {
+                        twitterIcon = findTwitterIcon(twitterHandle);
+                    }
+                }
+                catch (TwitterException e)
+                {
+                    Log.e(getClass().getSimpleName(), null, e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Object o)
+            {
+                ((TextView)findViewById(R.id.twitterHandle)).setText(twitterHandle);
+                if(twitterIcon != null)
+                {
+                    try
+                    {
+                        Drawable thumb_d = Drawable.createFromStream(new URL(twitterIcon).openStream(), "src");
+                        ((ImageView)findViewById(R.id.twitterIcon)).setImageDrawable(thumb_d);
+                    }
+                    catch (IOException e)
+                    {
+                        Log.e(getClass().getSimpleName(), null, e);
+                    }
+                }
+
+                if(twitterHandle == null)
+                {
+                    mLoginButton.setVisibility(View.VISIBLE);
+                    goButton.setEnabled(false);
+                    if(splashUrl != null)
+                    {
+                        splashUrl = null;
+                        Toast.makeText(Intro.this, "You must log into twitter first", Toast.LENGTH_LONG).show();
+                    }
+                }
+                else
+                {
+                    mLoginButton.setVisibility(View.GONE);
+                    goButton.setEnabled(true);
+                    if(splashUrl != null)
+                    {
+                        String passingUrl = splashUrl;
+                        splashUrl = null;
+                        try
+                        {
+                            grabConch(passingUrl);
+                        }
+                        catch (IOException e)
+                        {
+                            Log.e(Intro.class.getSimpleName(), null, e);
+                        }
+                    }
+                }
+            }
+        }.execute();
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanResult != null)
+        if (requestCode == OAUTH_REQUEST)
         {
-            try
+            if (resultCode == RESULT_OK)
             {
-                grabConch(scanResult.getContents());
+                AccessToken accessToken = null;
+                try
+                {
+                    String oauthVerifier = intent.getExtras().getString(Const.IEXTRA_OAUTH_VERIFIER);
+                    accessToken = mTwitter.getOAuthAccessToken(mRequestToken, oauthVerifier);
+                    TwitterPrefs.setAccessToken(this, accessToken.getToken(), accessToken.getTokenSecret());
+
+                    Toast.makeText(this, "authorized", Toast.LENGTH_SHORT).show();
+                }
+                catch (TwitterException e)
+                {
+                    e.printStackTrace();
+                }
+                refreshTwitterHandle();
             }
-            catch (IOException e)
+            else if (resultCode == RESULT_CANCELED)
             {
-                Log.e(getClass().getSimpleName(), null, e);
+                Log.w(getClass().getSimpleName(), "Twitter auth canceled.");
             }
         }
+        else
+        {
+            if(resultCode == RESULT_OK)
+            {
+                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+                if (scanResult != null)
+                {
+                    try
+                    {
+                        grabConch(scanResult.getContents());
+                    }
+                    catch (IOException e)
+                    {
+                        Log.e(getClass().getSimpleName(), null, e);
+                    }
+                }
+            }
+        }
+    }
+
+    private String findTwitterIcon(String twitterHandle) throws TwitterException
+    {
+        Twitter twitter = initTwitter();
+        if(twitter == null)
+            return null;
+        return twitter.getProfileImage(twitterHandle, ProfileImage.NORMAL).getURL();
+    }
+
+    private String findTwitterHandle() throws TwitterException
+    {
+        String handle = TwitterPrefs.getTwitterHandle(this);
+        if(handle != null)
+            return handle;
+
+        Twitter twitter = initTwitter();
+        if(twitter == null)
+            return null;
+
+        String remoteHandle = twitter.getScreenName();
+        TwitterPrefs.setTwitterHandle(this, remoteHandle);
+
+        return remoteHandle;
+    }
+
+    private Twitter initTwitter()
+    {
+        if (mTwitter == null) {
+            ConfigurationBuilder confbuilder = new ConfigurationBuilder();
+            Configuration conf = confbuilder
+                    .setOAuthConsumerKey(Const.CONSUMER_KEY)
+                    .setOAuthConsumerSecret(Const.CONSUMER_SECRET)
+                    .build();
+            mTwitter = new TwitterFactory(conf).getInstance();
+        }
+
+        SharedPreferences pref = getSharedPreferences(Const.PREF_NAME, MODE_PRIVATE);
+        String accessToken = pref.getString(Const.PREF_KEY_ACCESS_TOKEN, null);
+        String accessTokenSecret = pref.getString(Const.PREF_KEY_ACCESS_TOKEN_SECRET, null);
+        if (accessToken == null || accessTokenSecret == null) {
+            runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    Toast.makeText(Intro.this, "not authorized yet", Toast.LENGTH_SHORT).show();
+                }
+            });
+            return null;
+        }
+        mTwitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret));
+        return mTwitter;
     }
 
     private void practiceDrawing()
@@ -151,7 +369,7 @@ public class Intro extends Activity
     private void startDrawing(final String qrKey)
     {
         new AlertDialog.Builder(this)
-                .setMessage("OK! Get ready to draw! You have 30 seconds to create your masterpiece." +
+                .setMessage("OK! Get ready to draw! You have 60 seconds to create your masterpiece." +
                         " Go!")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener()
                 {
@@ -161,5 +379,12 @@ public class Intro extends Activity
                     }
                 })
                 .show();
+    }
+
+    public static void callMe(Context c, String splashUrl)
+    {
+        Intent intent = new Intent(c, Intro.class);
+        intent.putExtra(SPLASH_URL, splashUrl);
+        c.startActivity(intent);
     }
 }

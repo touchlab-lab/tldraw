@@ -1,6 +1,7 @@
 package co.touchlab.pdraw.service;
 
 import android.content.Context;
+import android.util.Log;
 import co.touchlab.android.superbus.Command;
 import co.touchlab.android.superbus.PermanentException;
 import co.touchlab.android.superbus.TransientException;
@@ -29,14 +30,18 @@ public class UploadStroke extends JsonFileCommand
     private List<Float> points;
     private int canvasWidth;
     private int canvasHeight;
+    private int timeOffset;
 
-    public UploadStroke(String color, float width, List<Float> points, int canvasWidth, int canvasHeight)
+    public UploadStroke(String color, float width, List<Float> points, int canvasWidth, int canvasHeight, int timeOffset)
     {
         this.color = color;
         this.width = width;
         this.points = points;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
+        this.timeOffset = timeOffset;
+
+        Log.i(getClass().getSimpleName(), "timeoffset: "+ timeOffset);
     }
 
     @Override
@@ -47,6 +52,7 @@ public class UploadStroke extends JsonFileCommand
         jsonObject.put("points", new JSONArray(points));
         jsonObject.put("canvasWidth", canvasWidth);
         jsonObject.put("canvasHeight", canvasHeight);
+        jsonObject.put("timeOffset", timeOffset);
     }
 
     @Override
@@ -61,8 +67,9 @@ public class UploadStroke extends JsonFileCommand
             points.add((float)jsonArray.getDouble(i));
         }
 
-        canvasWidth = (int) jsonObject.getInt("canvasWidth");
-        canvasHeight = (int) jsonObject.getInt("canvasHeight");
+        canvasWidth = jsonObject.getInt("canvasWidth");
+        canvasHeight = jsonObject.getInt("canvasHeight");
+        timeOffset = jsonObject.getInt("timeOffset");
     }
 
     @Override
@@ -86,6 +93,7 @@ public class UploadStroke extends JsonFileCommand
                 .addAllPoints(points)
                 .setCanvasWidth(canvasWidth)
                 .setCanvasHeight(canvasHeight)
+                .setTimeOffset(timeOffset)
                 .build();
         try
         {

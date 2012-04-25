@@ -41,9 +41,7 @@ public class ShowResult extends Activity
             public void onClick(View view)
             {
                 String imageLink = NetUtils.BASE_URL + "/s3d/" + picPath.substring(picPath.lastIndexOf("/") + 1);
-                String message = "I decorated (or defaced) Touch Lab's website! Check out my work! " +
-                        imageLink +
-                        " http://touchlab.co";
+                String message = "I decorated (or defaced) the @touchlabny website! Check out my work! " + imageLink;
                 ShareUtils.callShare(ShowResult.this, message);
             }
         });
