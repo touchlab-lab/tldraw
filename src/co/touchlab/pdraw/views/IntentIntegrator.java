@@ -194,7 +194,7 @@ public class IntentIntegrator {
      * Initiates a scan for all known barcode types.
      */
     public AlertDialog initiateScan() {
-        return initiateScan(ALL_CODE_TYPES);
+        return initiateScan(QR_CODE_TYPES);
     }
 
     /**

@@ -22,6 +22,7 @@ import co.touchlab.pdraw.utils.Const;
 import co.touchlab.pdraw.views.IntentIntegrator;
 import co.touchlab.pdraw.views.IntentResult;
 import com.google.zxing.client.android.CaptureActivity;
+import com.google.zxing.client.android.Intents;
 import org.apache.commons.lang3.StringUtils;
 import twitter4j.ProfileImage;
 import twitter4j.Twitter;
@@ -35,6 +36,7 @@ import twitter4j.conf.ConfigurationBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 
 /**
  * Created by IntelliJ IDEA.
@@ -55,6 +57,7 @@ public class Intro extends Activity
     private Button mLoginButton;
     private Button goButton;
     private String splashUrl;
+    private Collection<String> targetApplications;
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -83,9 +86,9 @@ public class Intro extends Activity
             @Override
             public void onClick(View view)
             {
-                //runQRScanner();
-                Intent intent = new Intent(Intro.this, CaptureActivity.class);
-                startActivity(intent);
+               // Intent intent = new Intent(Intro.this, CaptureActivity.class);
+                //startActivityForResult(intent, 15);
+                localScan();
             }
         });
 
@@ -139,6 +142,17 @@ public class Intro extends Activity
     {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.initiateScan();
+    }
+
+    private void localScan()
+    {
+        Intent intentScan = new Intent(this, CaptureActivity.class);
+        intentScan.setAction(Intents.Scan.ACTION);
+        intentScan.addCategory(Intent.CATEGORY_DEFAULT);
+
+        intentScan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intentScan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        startActivityForResult(intentScan, IntentIntegrator.REQUEST_CODE);
     }
 
     @SuppressWarnings("unchecked")
@@ -292,12 +306,12 @@ public class Intro extends Activity
                 Log.w(getClass().getSimpleName(), "Twitter auth canceled.");
             }
         }
-        else
+        else if (requestCode == IntentIntegrator.REQUEST_CODE)
         {
             if(resultCode == RESULT_OK)
             {
                 IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-                if (scanResult != null)
+                if (scanResult != null && scanResult.getContents().contains("draw.touchlab.co"))
                 {
                     try
                     {
@@ -307,6 +321,11 @@ public class Intro extends Activity
                     {
                         Log.e(getClass().getSimpleName(), null, e);
                     }
+                }
+
+                else
+                {
+                    Toast.makeText(this, "Invalid QR Code", Toast.LENGTH_SHORT).show();
                 }
             }
         }
