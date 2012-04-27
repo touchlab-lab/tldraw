@@ -8,18 +8,20 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import co.touchlab.appdebug.proto.Appdebug;
 import co.touchlab.ir.process.UploadManagerService;
 import co.touchlab.pdraw.utils.Const;
-import co.touchlab.pdraw.views.DrawView;
 import co.touchlab.pdraw.views.IntentIntegrator;
 import co.touchlab.pdraw.views.IntentResult;
+import com.google.zxing.client.android.CaptureActivity;
 import org.apache.commons.lang3.StringUtils;
 import twitter4j.ProfileImage;
 import twitter4j.Twitter;
@@ -81,7 +83,9 @@ public class Intro extends Activity
             @Override
             public void onClick(View view)
             {
-                runQRScanner();
+                //runQRScanner();
+                Intent intent = new Intent(Intro.this, CaptureActivity.class);
+                startActivity(intent);
             }
         });
 
