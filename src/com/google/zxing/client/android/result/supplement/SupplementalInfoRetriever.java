@@ -24,7 +24,6 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.widget.TextView;
-import com.google.zxing.client.android.history.HistoryManager;
 import com.google.zxing.client.result.ISBNParsedResult;
 import com.google.zxing.client.result.ParsedResult;
 import com.google.zxing.client.result.ProductParsedResult;
@@ -57,20 +56,19 @@ public abstract class SupplementalInfoRetriever implements Callable<Void> {
   public static void maybeInvokeRetrieval(TextView textView,
                                           ParsedResult result,
                                           Handler handler,
-                                          HistoryManager historyManager,
                                           Context context) {
 
     Collection<SupplementalInfoRetriever> retrievers = new ArrayList<SupplementalInfoRetriever>(1);
 
     if (result instanceof URIParsedResult) {
-      retrievers.add(new URIResultInfoRetriever(textView, (URIParsedResult) result, handler, historyManager, context));
+      retrievers.add(new URIResultInfoRetriever(textView, (URIParsedResult) result, handler, context));
     } else if (result instanceof ProductParsedResult) {
       String productID = ((ProductParsedResult) result).getProductID();
-      retrievers.add(new ProductResultInfoRetriever(textView, productID, handler, historyManager, context));
+      retrievers.add(new ProductResultInfoRetriever(textView, productID, handler, context));
     } else if (result instanceof ISBNParsedResult) {
       String isbn = ((ISBNParsedResult) result).getISBN();
-      retrievers.add(new ProductResultInfoRetriever(textView, isbn, handler, historyManager, context));
-      retrievers.add(new BookResultInfoRetriever(textView, isbn, handler, historyManager, context));
+      retrievers.add(new ProductResultInfoRetriever(textView, isbn, handler, context));
+      retrievers.add(new BookResultInfoRetriever(textView, isbn, handler, context));
     }
 
     for (SupplementalInfoRetriever retriever : retrievers) {
@@ -83,12 +81,10 @@ public abstract class SupplementalInfoRetriever implements Callable<Void> {
 
   private final WeakReference<TextView> textViewRef;
   private final Handler handler;
-  private final HistoryManager historyManager;
 
-  SupplementalInfoRetriever(TextView textView, Handler handler, HistoryManager historyManager) {
+  SupplementalInfoRetriever(TextView textView, Handler handler) {
     this.textViewRef = new WeakReference<TextView>(textView);
     this.handler = handler;
-    this.historyManager = historyManager;
   }
 
   @Override
@@ -142,8 +138,6 @@ public abstract class SupplementalInfoRetriever implements Callable<Void> {
       }
     });
 
-    // Add the text to the history.
-    historyManager.addHistoryItemDetails(itemID, newText);
   }
 
 }

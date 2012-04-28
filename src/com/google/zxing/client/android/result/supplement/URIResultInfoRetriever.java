@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.widget.TextView;
 import co.touchlab.pdraw.R;
 import com.google.zxing.client.android.HttpHelper;
-import com.google.zxing.client.android.history.HistoryManager;
 import com.google.zxing.client.result.URIParsedResult;
 
 import java.io.IOException;
@@ -38,9 +37,8 @@ final class URIResultInfoRetriever extends SupplementalInfoRetriever {
   URIResultInfoRetriever(TextView textView,
                          URIParsedResult result,
                          Handler handler,
-                         HistoryManager historyManager,
                          Context context) {
-    super(textView, handler, historyManager);
+    super(textView, handler);
     redirectString = context.getString(R.string.msg_redirect);
     this.result = result;
   }

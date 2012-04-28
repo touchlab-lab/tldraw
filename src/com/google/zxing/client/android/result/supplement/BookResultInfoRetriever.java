@@ -22,7 +22,6 @@ import android.widget.TextView;
 import co.touchlab.pdraw.R;
 import com.google.zxing.client.android.HttpHelper;
 import com.google.zxing.client.android.LocaleManager;
-import com.google.zxing.client.android.history.HistoryManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,9 +44,8 @@ final class BookResultInfoRetriever extends SupplementalInfoRetriever {
   BookResultInfoRetriever(TextView textView,
                           String isbn,
                           Handler handler,
-                          HistoryManager historyManager,
                           Context context) {
-    super(textView, handler, historyManager);
+    super(textView, handler);
     this.isbn = isbn;
     this.source = context.getString(R.string.msg_google_books);
     this.context = context;

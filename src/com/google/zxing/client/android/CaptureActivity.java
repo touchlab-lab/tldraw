@@ -42,9 +42,6 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.camera.CameraManager;
-import com.google.zxing.client.android.history.HistoryActivity;
-import com.google.zxing.client.android.history.HistoryItem;
-import com.google.zxing.client.android.history.HistoryManager;
 import com.google.zxing.client.android.result.ResultButtonListener;
 import com.google.zxing.client.android.result.ResultHandler;
 import com.google.zxing.client.android.result.ResultHandlerFactory;
@@ -70,22 +67,11 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private static final String TAG = CaptureActivity.class.getSimpleName();
 
   private static final int SHARE_ID = Menu.FIRST;
-  private static final int HISTORY_ID = Menu.FIRST + 1;
   private static final int SETTINGS_ID = Menu.FIRST + 2;
   private static final int HELP_ID = Menu.FIRST + 3;
   private static final int ABOUT_ID = Menu.FIRST + 4;
 
   private static final long DEFAULT_INTENT_RESULT_DURATION_MS = 1500L;
-  private static final long BULK_MODE_SCAN_DELAY_MS = 1000L;
-
-  private static final String PACKAGE_NAME = "com.google.zxing.client.android";
-  private static final String PRODUCT_SEARCH_URL_PREFIX = "http://www.google";
-  private static final String PRODUCT_SEARCH_URL_SUFFIX = "/m/products/scan";
-  private static final String[] ZXING_URLS = { "http://zxing.appspot.com/scan", "zxing://scan/" };
-  private static final String RETURN_CODE_PLACEHOLDER = "{CODE}";
-  private static final String RETURN_URL_PARAM = "ret";
-
-  public static final int HISTORY_REQUEST_CODE = 0x0000bacc;
 
   private static final Set<ResultMetadataType> DISPLAYABLE_METADATA_TYPES =
       EnumSet.of(ResultMetadataType.ISSUE_NUMBER,
@@ -101,26 +87,14 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private View resultView;
   private Result lastResult;
   private boolean hasSurface;
-  private boolean copyToClipboard;
   private IntentSource source;
   private String sourceUrl;
   private String returnUrlTemplate;
   private Collection<BarcodeFormat> decodeFormats;
   private String characterSet;
   private String versionName;
-  private HistoryManager historyManager;
   private InactivityTimer inactivityTimer;
   private BeepManager beepManager;
-
-  private final DialogInterface.OnClickListener aboutListener =
-      new DialogInterface.OnClickListener() {
-    @Override
-    public void onClick(DialogInterface dialogInterface, int i) {
-      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.zxing_url)));
-      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-      startActivity(intent);
-    }
-  };
 
   ViewfinderView getViewfinderView() {
     return viewfinderView;
@@ -143,14 +117,10 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     setContentView(R.layout.capture);
 
     hasSurface = false;
-    historyManager = new HistoryManager(this);
-    historyManager.trimHistory();
     inactivityTimer = new InactivityTimer(this);
     beepManager = new BeepManager(this);
 
     PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-    showHelpOnFirstLaunch();
   }
 
   @Override
@@ -193,8 +163,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     Intent intent = getIntent();
 
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    copyToClipboard = prefs.getBoolean(PreferencesActivity.KEY_COPY_TO_CLIPBOARD, true)
-        && (intent == null || intent.getBooleanExtra(Intents.Scan.SAVE_HISTORY, true));
 
     source = IntentSource.NONE;
     decodeFormats = null;
@@ -224,25 +192,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
           statusView.setText(customPromptMessage);
         }
 
-      } else if (dataString != null &&
-                 dataString.contains(PRODUCT_SEARCH_URL_PREFIX) &&
-                 dataString.contains(PRODUCT_SEARCH_URL_SUFFIX)) {
-
-        // Scan only products and send the result to mobile Product Search.
-        source = IntentSource.PRODUCT_SEARCH_LINK;
-        sourceUrl = dataString;
-        decodeFormats = DecodeFormatManager.PRODUCT_FORMATS;
-
-      } else if (isZXingURL(dataString)) {
-
-        // Scan formats requested in query string (all formats if none specified).
-        // If a return URL is specified, send the results there. Otherwise, handle it ourselves.
-        source = IntentSource.ZXING_LINK;
-        sourceUrl = dataString;
-        Uri inputUri = Uri.parse(sourceUrl);
-        returnUrlTemplate = inputUri.getQueryParameter(RETURN_URL_PARAM);
-        decodeFormats = DecodeFormatManager.parseDecodeFormats(inputUri);
-
       }
 
       characterSet = intent.getStringExtra(Intents.Scan.CHARACTER_SET);
@@ -250,18 +199,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     }
   }
   
-  private static boolean isZXingURL(String dataString) {
-    if (dataString == null) {
-      return false;
-    }
-    for (String url : ZXING_URLS) {
-      if (dataString.startsWith(url)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   @Override
   protected void onPause() {
     if (handler != null) {
@@ -307,8 +244,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     super.onCreateOptionsMenu(menu);
     menu.add(Menu.NONE, SHARE_ID, Menu.NONE, R.string.menu_share)
         .setIcon(android.R.drawable.ic_menu_share);
-    menu.add(Menu.NONE, HISTORY_ID, Menu.NONE, R.string.menu_history)
-        .setIcon(android.R.drawable.ic_menu_recent_history);
     menu.add(Menu.NONE, SETTINGS_ID, Menu.NONE, R.string.menu_settings)
         .setIcon(android.R.drawable.ic_menu_preferences);
     menu.add(Menu.NONE, HELP_ID, Menu.NONE, R.string.menu_help)
@@ -316,65 +251,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     menu.add(Menu.NONE, ABOUT_ID, Menu.NONE, R.string.menu_about)
         .setIcon(android.R.drawable.ic_menu_info_details);
     return true;
-  }
-
-  // Don't display the share menu item if the result overlay is showing.
-  @Override
-  public boolean onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    menu.findItem(SHARE_ID).setVisible(lastResult == null);
-    return true;
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-    switch (item.getItemId()) {
-      case SHARE_ID:
-        intent.setClassName(this, ShareActivity.class.getName());
-        startActivity(intent);
-        break;
-      case HISTORY_ID:
-        intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        intent.setClassName(this, HistoryActivity.class.getName());
-        startActivityForResult(intent, HISTORY_REQUEST_CODE);
-        break;
-      case SETTINGS_ID:
-        intent.setClassName(this, PreferencesActivity.class.getName());
-        startActivity(intent);
-        break;
-      case HELP_ID:
-        intent.setClassName(this, HelpActivity.class.getName());
-        startActivity(intent);
-        break;
-      case ABOUT_ID:
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.title_about) + versionName);
-        builder.setMessage(getString(R.string.msg_about) + "\n\n" + getString(R.string.zxing_url));
-        builder.setIcon(R.drawable.launcher_icon);
-        builder.setPositiveButton(R.string.button_open_browser, aboutListener);
-        builder.setNegativeButton(R.string.button_cancel, null);
-        builder.show();
-        break;
-      default:
-        return super.onOptionsItemSelected(item);
-    }
-    return true;
-  }
-
-  @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    if (resultCode == RESULT_OK) {
-      if (requestCode == HISTORY_REQUEST_CODE) {
-        int itemNumber = intent.getIntExtra(Intents.History.ITEM_NUMBER, -1);
-        if (itemNumber >= 0) {
-          HistoryItem historyItem = historyManager.buildHistoryItem(itemNumber);
-          decodeOrStoreSavedBitmap(null, historyItem.getResult());
-        }
-      }
-    }
   }
 
   private void decodeOrStoreSavedBitmap(Bitmap bitmap, Result result) {
@@ -424,7 +300,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     inactivityTimer.onActivity();
     lastResult = rawResult;
     ResultHandler resultHandler = ResultHandlerFactory.makeResultHandler(this, rawResult);
-    historyManager.addHistoryItem(rawResult, resultHandler);
 
     if (barcode == null) {
       // This is from history -- no saved barcode
@@ -436,23 +311,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         case NATIVE_APP_INTENT:
         case PRODUCT_SEARCH_LINK:
           handleDecodeExternally(rawResult, resultHandler, barcode);
-          break;
-        case ZXING_LINK:
-          if (returnUrlTemplate == null){
-            handleDecodeInternally(rawResult, resultHandler, barcode);
-          } else {
-            handleDecodeExternally(rawResult, resultHandler, barcode);
-          }
-          break;
-        case NONE:
-          SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-          if (prefs.getBoolean(PreferencesActivity.KEY_BULK_MODE, false)) {
-            Toast.makeText(this, R.string.msg_bulk_mode_scanned, Toast.LENGTH_SHORT).show();
-            // Wait a moment or else it will scan the same barcode continuously about 3 times
-            restartPreviewAfterDelay(BULK_MODE_SCAN_DELAY_MS);
-          } else {
-            handleDecodeInternally(rawResult, resultHandler, barcode);
-          }
           break;
       }
     }
@@ -559,7 +417,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       SupplementalInfoRetriever.maybeInvokeRetrieval(supplementTextView,
                                                      resultHandler.getResult(),
                                                      handler,
-                                                     historyManager,
                                                      this);
     }
 
@@ -576,11 +433,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         button.setVisibility(View.GONE);
       }
     }
-
-    if (copyToClipboard && !resultHandler.areContentsSecure()) {
-      ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-      clipboard.setText(displayContents);
-    }
   }
 
   // Briefly show the contents of the barcode, then handle the result outside Barcode Scanner.
@@ -591,11 +443,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     // barcode was found (e.g. contact info) rather than the full contents, which they won't
     // have time to read.
     statusView.setText(getString(resultHandler.getDisplayTitle()));
-
-    if (copyToClipboard && !resultHandler.areContentsSecure()) {
-      ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-      clipboard.setText(resultHandler.getDisplayContents());
-    }
 
     if (source == IntentSource.NATIVE_APP_INTENT) {
       
@@ -630,29 +477,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       }
       sendReplyMessage(R.id.return_scan_result, intent);
       
-    } else if (source == IntentSource.PRODUCT_SEARCH_LINK) {
-      
-      // Reformulate the URL which triggered us into a query, so that the request goes to the same
-      // TLD as the scan URL.
-      int end = sourceUrl.lastIndexOf("/scan");
-      String replyURL = sourceUrl.substring(0, end) + "?q=" + resultHandler.getDisplayContents() + "&source=zxing";      
-      sendReplyMessage(R.id.launch_product_query, replyURL);
-      
-    } else if (source == IntentSource.ZXING_LINK) {
-      
-      // Replace each occurrence of RETURN_CODE_PLACEHOLDER in the returnUrlTemplate
-      // with the scanned code. This allows both queries and REST-style URLs to work.
-      if (returnUrlTemplate != null) {
-        String codeReplacement = String.valueOf(resultHandler.getDisplayContents());
-        try {
-          codeReplacement = URLEncoder.encode(codeReplacement, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-          // can't happen; UTF-8 is always supported. Continue, I guess, without encoding
-        }
-        String replyURL = returnUrlTemplate.replace(RETURN_CODE_PLACEHOLDER, codeReplacement);
-        sendReplyMessage(R.id.launch_product_query, replyURL);
-      }
-      
     }
   }
   
@@ -665,36 +489,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     } else {
       handler.sendMessage(message);
     }
-  }
-
-  /**
-   * We want the help screen to be shown automatically the first time a new version of the app is
-   * run. The easiest way to do this is to check android:versionCode from the manifest, and compare
-   * it to a value stored as a preference.
-   */
-  private boolean showHelpOnFirstLaunch() {
-    try {
-      PackageInfo info = getPackageManager().getPackageInfo(PACKAGE_NAME, 0);
-      int currentVersion = info.versionCode;
-      // Since we're paying to talk to the PackageManager anyway, it makes sense to cache the app
-      // version name here for display in the about box later.
-      this.versionName = info.versionName;
-      SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-      int lastVersion = prefs.getInt(PreferencesActivity.KEY_HELP_VERSION_SHOWN, 0);
-      if (currentVersion > lastVersion) {
-        prefs.edit().putInt(PreferencesActivity.KEY_HELP_VERSION_SHOWN, currentVersion).commit();
-        Intent intent = new Intent(this, HelpActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        // Show the default page on a clean install, and the what's new page on an upgrade.
-        String page = lastVersion == 0 ? HelpActivity.DEFAULT_PAGE : HelpActivity.WHATS_NEW_PAGE;
-        intent.putExtra(HelpActivity.REQUESTED_PAGE_KEY, page);
-        startActivity(intent);
-        return true;
-      }
-    } catch (PackageManager.NameNotFoundException e) {
-      Log.w(TAG, e);
-    }
-    return false;
   }
 
   private void initCamera(SurfaceHolder surfaceHolder) {
